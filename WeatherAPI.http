@@ -1,0 +1,20 @@
+@WeatherAPI_HostAddress = http://localhost:5280
+
+GET {{WeatherAPI_HostAddress}}/api/GetCurrentWeather/{rzeszow}
+ApiKey: test
+Accept: application/json
+
+###
+GET {{WeatherAPI_HostAddress}}/api/GetFutureWeather/rzeszow/2024-07-01
+ApiKey: test
+Accept: application/json
+###
+
+GET {{WeatherAPI_HostAddress}}/api/GetForecast/{rzeszow}/{5}
+ApiKey: test
+Accept: application/json
+###
+
+GET {{WeatherAPI_HostAddress}}/api/GetWeatherHistory/rzeszow/2024-05-31%2022%3A01
+ApiKey: test
+Accept: application/json
