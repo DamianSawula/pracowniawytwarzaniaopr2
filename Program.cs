@@ -23,7 +23,7 @@ namespace WeatherAPI
 
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Weather API", Version = "v1" });
 
                 // Dodaj konfiguracjê dla ApiKey Authorization
                 c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
