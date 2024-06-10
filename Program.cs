@@ -52,15 +52,10 @@ namespace WeatherAPI
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddCors(options =>
+            builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
             {
-                options.AddPolicy("AllowAllOrigins", builder => { 
-                builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-
-            });
-        });
+                builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+            }));
 
             var app = builder.Build();
 
@@ -73,7 +68,7 @@ namespace WeatherAPI
             var apiKey = builder.Configuration["ApiKey"];
             app.UseMiddleware<ApiKeyMiddleware>(Options.Create(new ApiKeyMiddlewareOptions { ApiKey = apiKey }));
             app.UseHttpsRedirection();
-            app.UseCors("AllowAllOrigins");
+            app.UseCors("corsapp");
             app.UseAuthorization();
 
 
