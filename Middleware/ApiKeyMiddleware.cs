@@ -22,6 +22,12 @@ namespace WeatherAPI.Middleware
         {
             const string ApiKeyHeaderName = "ApiKey";
 
+            if(context.Request.Method==HttpMethods.Options)
+            {
+                await _next(context);
+                return;
+            }
+
             if (!context.Request.Headers.TryGetValue(ApiKeyHeaderName, out var extractedApiKey))
             {
                 context.Response.StatusCode = 401;
