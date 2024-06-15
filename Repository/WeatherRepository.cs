@@ -4,6 +4,7 @@ using System.Data;
 using WeatherAPI.Context;
 using WeatherAPI.Interfaces;
 using WeatherAPI.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WeatherAPI.Repository
 {
@@ -74,6 +75,34 @@ namespace WeatherAPI.Repository
             {
                 Console.WriteLine(ex.Message);
                 throw new Exception("Błąd pobierania historii pogody z bazy");
+            }
+        }
+        public async Task<bool> InsertAuditLogs(string message)
+        {
+            try
+            {
+                var procedure = "dbo.InsertAuditLog";
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@json", message, DbType.String, direction: ParameterDirection.Input);
+                using (var conn = _context.CreateConnection())
+                {
+                    try
+                    {
+                        var result = await conn.ExecuteAsync(procedure, parameters, commandType: CommandType.StoredProcedure);
+
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new Exception("Błąd rejestrowania pogody w bazie.");
             }
         }
     }

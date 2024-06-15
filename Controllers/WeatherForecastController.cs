@@ -16,12 +16,14 @@ namespace WeatherAPI.Controllers
         private readonly IConfiguration _conf;
         private readonly string _apiUrl;
         private readonly string _apiKey;
+        private readonly RabbitMQSender _rabbitmqSender;
         public WeatherForecastController(IWeatherRepository weatherRepository, IConfiguration conf)
         {
             _weatherRepository = weatherRepository;
             _conf = conf;
             _apiKey = _conf.GetSection("WeatherAPI").GetSection("WeatherApiKey").Value;
             _apiUrl = _conf.GetSection("WeatherAPI").GetSection("WeatherURL").Value;
+            _rabbitmqSender = new("localhost", "audyt-logs", "guest", "guest","weather_audyt");
         }
 
         [HttpGet("GetCurrentWeather/{city}")]
@@ -29,6 +31,14 @@ namespace WeatherAPI.Controllers
         {
             try
             {
+                AuditLogs auditLogs = new AuditLogs()
+                {
+                    IpAddress = HttpContext.Connection.RemoteIpAddress.ToString(),
+                    RequestedCity = city,
+                    RequestedMethod = "GetCurrentWeather",
+                    RequestTime = DateTime.Now,
+                };
+                _rabbitmqSender.SendMessage(System.Text.Json.JsonSerializer.Serialize(auditLogs));
                 RestClientOptions restOptions = new RestClientOptions(_apiUrl);
                 RestClient restClient = new RestClient(restOptions);
                 RestRequest request = new($"v1/current.json?key={_apiKey}&q={city}");
@@ -54,6 +64,14 @@ namespace WeatherAPI.Controllers
         {
             try
             {
+                AuditLogs auditLogs = new AuditLogs()
+                {
+                    IpAddress = HttpContext.Connection.RemoteIpAddress.ToString(),
+                    RequestedCity = city,
+                    RequestedMethod = "GetFutureWeather",
+                    RequestTime = DateTime.Now,
+                };
+                _rabbitmqSender.SendMessage(System.Text.Json.JsonSerializer.Serialize(auditLogs));
                 RestClientOptions restOptions = new RestClientOptions(_apiUrl);
                 RestClient restClient = new RestClient(restOptions);
                 RestRequest request = new($"v1/future.json?q={city}&dt={date}&key={_apiKey}");
@@ -81,6 +99,14 @@ namespace WeatherAPI.Controllers
         {
             try
             {
+                AuditLogs auditLogs = new AuditLogs()
+                {
+                    IpAddress = HttpContext.Connection.RemoteIpAddress.ToString(),
+                    RequestedCity = city,
+                    RequestedMethod = "GetForecastWeather",
+                    RequestTime = DateTime.Now,
+                };
+                _rabbitmqSender.SendMessage(System.Text.Json.JsonSerializer.Serialize(auditLogs));
                 RestClientOptions restOptions = new RestClientOptions(_apiUrl);
                 RestClient restClient = new RestClient(restOptions);
                 RestRequest request = new($"v1/forecast.json?q={city}&days={days}&key={_apiKey}");
@@ -107,6 +133,14 @@ namespace WeatherAPI.Controllers
         {
             try
             {
+                AuditLogs auditLogs = new AuditLogs()
+                {
+                    IpAddress = HttpContext.Connection.RemoteIpAddress.ToString(),
+                    RequestedCity = city,
+                    RequestedMethod = "GetWeatherHistory",
+                    RequestTime = DateTime.Now,
+                };
+                _rabbitmqSender.SendMessage(System.Text.Json.JsonSerializer.Serialize(auditLogs));
                 var weatherHistory = await _weatherRepository.GetWeather(city, DateTime.Parse(date));
                 return new OkObjectResult(weatherHistory);
             }

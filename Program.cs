@@ -1,4 +1,5 @@
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using WeatherAPI.Context;
@@ -23,6 +24,16 @@ namespace WeatherAPI
             builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
             builder.Services.AddScoped<DapperContext>();
             builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
+            builder.Services.AddHostedService<RabbitMQBackgroundService>(provider =>
+            {var configuration = provider.GetRequiredService<IConfiguration>();
+                var hostname = "localhost";
+                var queueName = "audyt";
+                var username = "guest";
+                var password = "guest";
+                var virtualHost = "weather_audyt";
+                var connectionString = "Server=localhost; database=WeatherDatabase; User Id=sa; Password=weatherAPIdatabaseP4ssword!; Encrypt=false;";
+                return new RabbitMQBackgroundService(hostname,queueName, username, password, virtualHost,connectionString);
+            });
 
             builder.Services.AddSwaggerGen(c =>
             {
